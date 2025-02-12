@@ -1,26 +1,28 @@
 package kz.aitu.oop.restservice.controller;
 
-import kz.aitu.oop.restservice.dao.BookingDAO;
 import kz.aitu.oop.restservice.entities.Room;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
+import kz.aitu.oop.restservice.service.RoomService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/rooms")
+@RequestMapping("/api/rooms")
 public class RoomController {
-    private final BookingDAO bookingDAO;
+    private final RoomService roomService;
 
-    public RoomController(BookingDAO bookingDAO) {
-        this.bookingDAO = bookingDAO;
-    }
-
-    @GetMapping
-    public List<Room> getAllRooms() {
-        return bookingDAO.getAllRooms();
+    @Autowired
+    public RoomController(RoomService roomService) {
+        this.roomService = roomService;
     }
 
     @PostMapping
-    public void addRoom(@RequestBody Room room) {
-        bookingDAO.addRoom(room);
+    public ResponseEntity<Boolean> addRoom(@RequestBody Room room) {
+        boolean savedRoom = roomService.addRoom(room);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedRoom);
     }
 }

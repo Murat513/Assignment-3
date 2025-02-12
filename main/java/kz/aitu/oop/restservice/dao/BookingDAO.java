@@ -1,5 +1,6 @@
 package kz.aitu.oop.restservice.dao;
 
+
 import kz.aitu.oop.restservice.database.DatabaseConnection;
 import kz.aitu.oop.restservice.entities.Booking;
 import kz.aitu.oop.restservice.entities.Guest;
@@ -131,12 +132,15 @@ public class BookingDAO {
         try (Connection connection = DatabaseConnection.getConnection();
              Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM rooms")) {
+
             while (rs.next()) {
-                Room room = new Room(
-                        rs.getInt("id"),
-                        rs.getString("type"),
-                        rs.getDouble("price")
-                );
+                Room room = new Room();
+                room.setId(rs.getInt("id"));
+                room.setRoomNumber(rs.getInt("roomNumber")); // Исправили название
+                room.setRoomType(rs.getString("roomType")); // Исправили название
+                room.setAvailable(rs.getBoolean("isAvailable")); // Добавили доступность
+                room.setPrice(rs.getDouble("price"));
+
                 rooms.add(room);
             }
         } catch (SQLException e) {
@@ -145,15 +149,15 @@ public class BookingDAO {
         return rooms;
     }
 
-    public void addRoom(Room room) {
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement stmt = connection.prepareStatement("INSERT INTO rooms (type, price) VALUES (?, ?)")) {
-            stmt.setString(1, room.getType());
+    public boolean addRoom(Room room) {
+        String query = "INSERT INTO rooms (type, price) VALUES (?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, room.getRoomType());
             stmt.setDouble(2, room.getPrice());
-            stmt.executeUpdate();
+            return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
     }
-
 }
